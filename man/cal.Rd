@@ -5,20 +5,20 @@
 \alias{cal}
 \title{Calibration data}
 \format{A data.frame of 150 observations containing columns:\cr
-    - \code{sampleid} unique identifier for each sample;\cr
-    - \code{plotid} unique identifier for each sample location;\cr
-    - \code{date} sampling date;\cr
-    - \code{year} sampling year;\cr
-    - \code{species} 6-digit abbreviation for each species;\cr
-    - \code{fg} abbreviation for functional groups;\cr
-    - \code{type} moss 'm' or lichen 'l' organism type;\cr
-    - \code{ovendrymass} oven-dry mass, in grams;\cr
-    - \code{depth} vertical depth, in centimeters;\cr
-    - \code{area} horizontal area, in square centimeters;\cr
-    - \code{c} total carbon content, as a percentage;\cr
-    - \code{n} total nitrogen content, as a percentage;\cr
-    - \code{vol} volume, in cubic centimeters;\cr
-    - \code{dens} density, in grams per cubic centimeter;\cr}
+    - \code{sampleid}\tab unique identifier for each sample;\cr
+    - \code{plotid}\tab unique identifier for each sample location;\cr
+    - \code{date}\tab sampling date;\cr
+    - \code{year}\tab sampling year;\cr
+    - \code{species}\tab 6-digit abbreviation for each species;\cr
+    - \code{fg}\tab abbreviation for functional groups;\cr
+    - \code{type}\tab moss 'm' or lichen 'l' organism type;\cr
+    - \code{ovendrymass}\tab oven-dry mass, in grams;\cr
+    - \code{depth}\tab vertical depth, in centimeters;\cr
+    - \code{area}\tab horizontal area, in square centimeters;\cr
+    - \code{c}\tab total carbon content, as a percentage;\cr
+    - \code{n}\tab total nitrogen content, as a percentage;\cr
+    - \code{vol}\tab volume, in cubic centimeters;\cr
+    - \code{dens}\tab density, in grams per cubic centimeter.\cr}
 \usage{
 data(cal)
 }
