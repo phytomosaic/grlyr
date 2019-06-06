@@ -1,15 +1,14 @@
 ######################################################################
 
-
-
-
 ####    Pre-processing data    ####
 rm(list=ls())
-require(plyr)       # for data processing
-require(reshape2)   # for data processing
-require(vegan)      # for ecological tasks
+require(plyr)           # for data processing
+require(reshape2)       # for data processing
+require(vegan)          # for ecological tasks (Hill numbers and NMS)
+require(viridisLite)    # for color scales
 
-
+# ### to cite in publications, please use:
+# citation('grlyr')
 
 ### 2013 calibration data
 cal <- read.csv('~/_prj/9_intak/data_2013/data/2013biomass.csv',
@@ -18,38 +17,77 @@ names(cal)[names(cal)=='gf'] <- 'fg'
 names(cal)[names(cal)=='biomassid'] <- 'sampleid'
 cal$date <- as.character(cal$date)
 cal$date[cal$date == 2012] <- '8/1/2012'
-cal$date <- as.Date(cal$date, format = "%m/%d/%Y")
+cal$date <- as.Date(cal$date, format = '%m/%d/%Y')
 cal$vol  <- cal$depth * cal$area
 cal$dens <- cal$ovendrymass / cal$vol
 cal$fg   <- as.character(cal$fg) # assign <1cm acrocarps to CC
 cal$fg[ cal$depth <= 1 & cal$fg=='A' ] <- 'C'
 cal$fg  <- as.factor(cal$fg)
 cal     <- cal[!colnames(cal)=='oldmass']
-head(cal)
-str(cal)
 # save(cal, file='C:/Users/Rob/Documents/_prj/grlyr/data/cal.rda')
+# load(cal)
+
+# ### 2016 Milton data
+# x <- read.csv('~/_prj/9_intak/2016_MiltonRanch/milton_data.csv',
+#               header=T, row.names=1, stringsAsFactors=T)
+# head(x)
+# dim(x)
+# names(x)[names(x)=='gf'] <- 'fg'
 
 
+# ### 2017 Plant and Soil data (really 2014 intak data)
+# # ###
+# load('~/papers_submitted/_old_2011-2017/2017_PlantAndSoil_interiorAKcarbon/revised_31Aug2017/Ch2_S2_data.rda')
+# rm(d1,d2,d3,d4,d)
+# est <- df
+# ### fuzz coordinates before making public data
+# est$nlat <- est$lat
+# est$nlon <- est$lon
+# est$lat  <- est$lon <- NA
+# set.seed(271)
+# for (i in unique(est$pid)){
+#         est$lon[est$pid == i] <- est$nlon[est$pid == i] +
+#                 runif(1, -0.1, 0.1)
+#         est$lat[est$pid == i] <- est$nlat[est$pid == i] +
+#                 runif(1, -0.1, 0.1)
+# }
+# est <- est[,!colnames(est) %in% c('nlon','nlat','hist_office_elev')]
+# names(est)[names(est)=='gf'] <- 'fg'
+# head(est)
+# save(est, file='C:/Users/Rob/Documents/_prj/grlyr/data/est.rda')
+# # load(est)
 
 
+x <- est
+head(est)
 
-
-
-### 2016 Milton data
-x <- read.csv('~/_prj/9_intak/2016_MiltonRanch/milton_data.csv',
-              header=T, row.names=1, stringsAsFactors=T)
-head(x)
-dim(x)
-names(x)[3] <- 'fg'
-
+### differing functional grp definitions
+fg_forest <- c('CC','CO',
+               'LF','LLFOL','LLFRU','LNFOL','LNFRU',
+               'MF','MN','MS','MT',
+               'VF','VS')
+orgtype_f <- c(rep('lich',2),rep('lich',5),rep('moss',4),rep('moss',2))
+fg_rangel <- c('CBIND', 'CCYANO', 'CN', 'CO', 'CROCK', 'CSOIL',
+               'LF','LLFOL','LLFRU','LNFOL','LNFRU',
+               'MF','MN','MS','MT',
+               'VF','VS')
+orgtype_r <- c(rep('crust',6),rep('lich',5),rep('moss',4),rep('moss',2))
 
 ### data checks
-fg <- c('MF', 'MN', 'MS', 'MT', 'MTL', 'VF', 'VS',
-        'LLFOL', 'LLFRU',
-        'CBIND', 'CCYANO', 'CN', 'CO', 'CROCK', 'CSOIL', 'NOS')
-orgtype <- c(rep('moss',7), rep('lich',2), rep('crust',7))
-if (!all(x$fg %in% fg)) {
+# fg <- c('MF', 'MN', 'MS', 'MT', 'MTL', 'VF', 'VS',
+#         'LLFOL', 'LLFRU',
+#         'CBIND', 'CCYANO', 'CN', 'CO', 'CROCK', 'CSOIL', 'NOS')
+# orgtype <- c(rep('moss',7), rep('lich',2), rep('crust',7))
+isforest <- all(x$fg %in% fg_forest)
+israngel <- all(x$fg %in% fg_rangel)
+if (!isforest & !israngel) {
         stop('functional groups in `x$fg` not valid')
+}
+if(isforest){
+        orgtype <- orgtype_f
+}
+if(israngel){
+        orgtype <- orgtype_r
 }
 cvrclass <- c(0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99)
 # cvrclass <- c(0,1,2,3,4,5,6,7,8,9,10)  ### for FIA
@@ -275,9 +313,37 @@ tot <- data.frame(  # summaries of all 5 plots
 # grid.arrange(p1,p2,p3,nrow=1)
 # # dev.off()
 # #### end plotting section ####
-#### end document #############################################################
 
 
-
-
-
+### all current references
+# Calabria, L. M., K. Petersen, S. T. Hamman, and R. J. Smith. 2016.
+# Prescribed fire decreases lichen and bryophyte biomass and alters
+# functional group composition in Pacific Northwest prairies.
+# Northwest Science 90:470–483.
+#
+# Pattison, R., H.-E. Andersen, A. Gray, B. Schulz, R. J. Smith, and
+# S. Jovan. 2018. Forests of the Tanana Valley State Forest and Tetlin
+# National Wildlife Refuge, Alaska: results of the 2014 pilot
+# inventory. Page 80. Gen. Tech. Rep. PNW-GTR-967, US Department of
+# Agriculture, Forest Service, Pacific Northwest Research Station,
+# Portland, OR.
+#
+# Rosso, A., P. Neitlich, and R. J. Smith. 2014. Non-destructive
+# lichen biomass estimation in Northwestern Alaska: a comparison of
+# methods. PLoS ONE 9:e103739.
+#
+# Smith, R. J., J. C. Benavides, S. Jovan, M. Amacher, and B. McCune.
+# 2015. A rapid method for landscape assessment of carbon storage and
+# ecosystem function in moss and lichen ground layers. The Bryologist
+# 118:32–45.
+#
+# Smith, R. J., S. Jovan, A. N. Gray, and B. McCune. 2017. Sensitivity
+# of carbon stores in boreal forest moss mats - effects of vegetation,
+# topography and climate. Plant and Soil 421:31–42.
+#
+# Smith, R. J., S. Jovan, and B. McCune. 2014. Ubiquitous moss and
+# lichen mats promote forest health. Pages 68–69 in E. Graham and T.
+# Huette, editors. Forest Health Conditions in Alaska 2013.
+# R10-PR-035. USDA Forest Service, Alaska Region, Anchorage, Alaska.
+#
+###   END   #########################################################
