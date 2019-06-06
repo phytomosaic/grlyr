@@ -1,8 +1,11 @@
 Package: grlyr
 Title: Ground Layer Estimation
 Version: 0.0.01-2019-06-05
-Authors@R: person("Robert", "Smith", email = "smithr2@oregonstate.edu", role = c("aut", "cre"))
-Description: Estimates biomass, carbon and nitrogen of moss and lichen ground layers as part of the US Forest Service Forest Inventory and Analysis program. 
+Authors@R: person("Robert", "Smith", 
+    email = "smithr2@oregonstate.edu", role = c("aut", "cre"))
+Description: Estimates biomass, carbon and nitrogen of moss and 
+    lichen ground layers as part of the US Forest Service Forest 
+    Inventory and Analysis program. 
 Depends: R (>= 3.6.0)
 Imports:
     plyr,
