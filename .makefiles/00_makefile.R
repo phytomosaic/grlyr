@@ -14,15 +14,16 @@ citation('grlyr') # please cite in publications
 
 ###   load data: FIA interior Alaska estimation points
 data(est)
-head(est)
 
 ### calculate biomass using the calc_biomass function
 x <- calc_biomass(est)
 rm(est)
-dim(x)
 
-### aggregate
+### summary by functional groups
+summary_fg(x)
+summary_fg(x, eachplot=TRUE)
 
+### summary by plots
 
 
 
@@ -30,52 +31,12 @@ dim(x)
 ######################################################################
 ####    Aggregate to plot level    ####
 
+### summarize for PLOTS:
 # check
 if (!inherits(x, "grlyr")) {
         stop('must inherit from `grlyr`')
 }
 
-
-### Aggregate for FXNL GRPS:
-# SE function returns '0' instead of NA for zero-length vectors
-`myse` <- function(a, ...) {
-        if ( length(a) < 2 ){
-                return(0L)
-        } else {
-                out <- sd(a, na.rm=T) / sqrt(length(na.omit(a))-1)
-                out
-        }
-}
-# mean and SE of growth forms within each plot...
-tmp <- ddply(x, .(fg, plot), summarize,
-             massp  = mean(mass*100, na.rm=T),# kg/ha
-             masssd = myse(mass*100, na.rm=T),# kg/ha
-             c      = mean(predC*100, na.rm=T), # kg/ha
-             csd    = myse(predC*100, na.rm=T), # kg/ha
-             n      = mean(predN*100, na.rm=T), # kg/ha
-             nsd    = myse(predN*100, na.rm=T), # kg/ha
-             vol    = mean(volume*0.1, na.rm=T), # m3/ha
-             volsd  = myse(volume*0.1, na.rm=T), # m3/ha
-             coverp = mean(cover*100,na.rm=T),   # %
-             coversd= myse(cover*100, na.rm=T), # % per mp
-             .progress='time' )
-# ... then across all plots
-tmpgf <- ddply(tmp, .(fg), summarize,
-               mass   = mean(massp,  na.rm=T), # kg/ha
-               masssd = mean(masssd, na.rm=T), # kg/ha
-               c      = mean(c,      na.rm=T), # kg/ha
-               csd    = mean(csd,    na.rm=T), # kg/ha
-               n      = mean(n,      na.rm=T), # kg/ha
-               nsd    = mean(nsd,    na.rm=T), # kg/ha
-               vol    = mean(vol,    na.rm=T), # m3/ha
-               volsd  = mean(volsd,  na.rm=T), # m3/ha
-               cover  = mean(coverp, na.rm=T), # %
-               coversd= mean(coversd,na.rm=T), # % per mp
-               .progress='time' )
-(tmpgf <- data.frame(fg=tmpgf[,1], round(tmpgf [,-1], 1)))
-rm(tmp, myse)
-
-### Aggregate for PLOTS:
 # first, sum per microplot for ea type, then both moss/lich combined
 tmp <- ddply(x, .(mpid, type), summarize,
              mp_mass = round(sum(mass,na.rm=TRUE),4))
@@ -99,8 +60,6 @@ d <- ddply(y, .(plot), summarize,
            lich_sd  = sd(mp_lich*100,  na.rm=T), # kg/ha
            moss_mn  = mean(mp_moss*100,na.rm=T), # kg/ha
            moss_sd  =  sd(mp_moss*100, na.rm=T), # kg/ha
-           # crust_mn = mean(mp_crust*100,na.rm=T),# kg/ha
-           # crust_sd =  sd(mp_crust*100, na.rm=T),# kg/ha
            c_mn     = mean(mp_c*100,   na.rm=T), # kg/ha
            c_sd     =   sd(mp_c*100,   na.rm=T), # kg/ha
            n_mn     = mean(mp_n*100,   na.rm=T), # kg/ha
@@ -110,8 +69,8 @@ d <- ddply(y, .(plot), summarize,
            cover_mn = mean(mp_cover,na.rm=T),    # %
            cover_sd =  sd(mp_cover, na.rm=T),    # %
            matdepth_mn= mean(depth,      na.rm=T), # cm
-           lat     = head(na.omit(lat),1),    # degrees
-           lon     = head(na.omit(lon),1))    # degrees
+           lat     = head(na.omit(lat),1),      # degrees
+           lon     = head(na.omit(lon),1))      # degrees
 d$fgr <- ddply(y[y$covercm != '0',,drop = T], .(plot), summarize,
                fgr=length(unique(fg)))$fgr      # richness
 d    <- arrange(d, plot)
