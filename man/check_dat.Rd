@@ -11,7 +11,7 @@ check_dat(x, ...)
 \code{c("pid","microquad","gf","cover","depth")}.  Each row is
 an observation for each functional grp within a}
 
-\item{...}{further arguments passed to other functions.}
+\item{...}{further arguments (currently ignored).}
 }
 \value{
 Logical value.
@@ -21,7 +21,7 @@ Verifies proper data format before further processing.
 }
 \examples{
 x <- matrix(NA, 5, 5)
-dimnames(x)[[2]] <- c("pid","microquad","gf","cover","depth")
+dimnames(x)[[2]] <- c("plot","microquad","fg","cover","depth")
 check_dat(x)
 check_dat(data.frame(x))
 

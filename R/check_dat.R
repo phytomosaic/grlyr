@@ -8,14 +8,14 @@
 #'     an observation for each functional grp within a
 #      microplot, nested within transects > subplots > plots.
 #'
-#' @param ... further arguments passed to other functions.
+#' @param ... further arguments (currently ignored).
 #'
 #' @return
 #' Logical value.
 #'
 #' @examples
 #' x <- matrix(NA, 5, 5)
-#' dimnames(x)[[2]] <- c("pid","microquad","gf","cover","depth")
+#' dimnames(x)[[2]] <- c("plot","microquad","fg","cover","depth")
 #' check_dat(x)
 #' check_dat(data.frame(x))
 #'
@@ -24,6 +24,6 @@
 `check_dat` <- function(x, ...){
      isdf <- is.data.frame(x)
      nm   <- dimnames(x)[[2]]
-     vec  <- c("pid","microquad","gf","cover","depth")
+     vec  <- c('plot', 'microquad', 'fg', 'cover', 'depth')
      all(isdf, nm[1:5] == vec)
 }
