@@ -8,9 +8,11 @@ require(viridisLite)    # for color scales
 require(plyr)           # for data processing
 require(reshape2)       # for data processing
 require(vegan)          # for ecological tasks (Hill numbers and NMS)
-citation('grlyr') # please cite in publications
-?est
-?cal
+
+# ### for further information
+# citation('grlyr') # please cite in publications
+# ?est
+# ?cal
 
 ###   load data: FIA interior Alaska estimation points
 data(est)
@@ -24,74 +26,24 @@ summary_fg(x)
 summary_fg(x, eachplot=TRUE)
 
 ### summary by plots
+s <- summary_plot(x)
 
+### plots and maps
+
+head(x)
+head(s)
+dim(x)
+dim(s)
+
+### match lat/lon to s
 
 
 
 ######################################################################
-####    Aggregate to plot level    ####
-
-### summarize for PLOTS:
-# check
-if (!inherits(x, "grlyr")) {
-        stop('must inherit from `grlyr`')
-}
-
-# first, sum per microplot for ea type, then both moss/lich combined
-tmp <- ddply(x, .(mpid, type), summarize,
-             mp_mass = round(sum(mass,na.rm=TRUE),4))
-tmp <- dcast(tmp, mpid ~ type, value.var = c('mp_mass') )
-tmp[is.na(tmp)] <- 0
-tmp$combo <- tmp$lich + tmp$moss # + tmp$crust
-y <- join(tmp, x, by=c('mpid'), type='full', match='all') ; rm(tmp)
-y <- rename(y, c('moss'='mp_moss', 'lich'='mp_lich', # g/microplot
-                 'crust'='mp_crust', 'combo'='mp_combo'))
-y <- ddply(y, .(mpid), mutate,                  # sum *within* mp
-           mp_c      = sum(predC, na.rm=TRUE), # g/microplot
-           mp_n      = sum(predN, na.rm=TRUE), # g/microplot
-           mp_vol    = sum(volume,na.rm=TRUE), # cm3/microplot
-           mp_cover  = sum(cover, na.rm=TRUE)) # % per mp
-# aggregate to plot-level
-d <- ddply(y, .(plot), summarize,
-           combo_mn = mean(mp_combo*100,na.rm=T),# kg/ha
-           combo_sd = sd(mp_combo*100,  na.rm=T),# kg/ha
-           cv       = combo_sd/combo_mn,             # CV ratio
-           lich_mn  = mean(mp_lich*100,na.rm=T), # kg/ha
-           lich_sd  = sd(mp_lich*100,  na.rm=T), # kg/ha
-           moss_mn  = mean(mp_moss*100,na.rm=T), # kg/ha
-           moss_sd  =  sd(mp_moss*100, na.rm=T), # kg/ha
-           c_mn     = mean(mp_c*100,   na.rm=T), # kg/ha
-           c_sd     =   sd(mp_c*100,   na.rm=T), # kg/ha
-           n_mn     = mean(mp_n*100,   na.rm=T), # kg/ha
-           n_sd     =   sd(mp_n*100,   na.rm=T), # kg/ha
-           vol_mn   = mean(mp_vol*0.1, na.rm=T), # m3/ha
-           vol_sd   =   sd(mp_vol*0.1, na.rm=T), # m3/ha
-           cover_mn = mean(mp_cover,na.rm=T),    # %
-           cover_sd =  sd(mp_cover, na.rm=T),    # %
-           matdepth_mn= mean(depth,      na.rm=T), # cm
-           lat     = head(na.omit(lat),1),      # degrees
-           lon     = head(na.omit(lon),1))      # degrees
-d$fgr <- ddply(y[y$covercm != '0',,drop = T], .(plot), summarize,
-               fgr=length(unique(fg)))$fgr      # richness
-d    <- arrange(d, plot)
-dcast(y, mpid ~ fg, value.var='mass', drop=F)
-wide <- dcast(y, plot ~ fg, fun.aggregate=sum,value.var='mass',drop=F)
-row.names(wide) <- wide[,1] ; wide <- wide[,-1]
-d    <- cbind(d, hill = renyi(wide, scales=c(1),hill=T))
-nr   <- length(d$plot)
-tot  <- data.frame(
-        plot = paste('Mean of all', nr, 'plots'),
-        t(data.frame(mean=apply(d[,-1], 2, mean, na.rm=T))))
-(summaries <- rbind(d, tot))
-tail(summaries)
-# write.csv(tmpgf, 'summary_fg.csv', row.names=F)
-# write.csv(summaries, 'summary_plot.csv', row.names=F)
-# write.csv(y, 'data_microquads.csv', row.names=F)
-#### end aggregate section ####
-
-
 ######################################################################
-
+######################################################################
+######################################################################
+######################################################################
 ######################################################################
 ####    Plotting    ####
 
@@ -101,7 +53,7 @@ tail(summaries)
         plot(x$lon, x$lat, col=ecole::colvec(z, 99, alpha=0.9),
              pch=16, las=1, bty='L', ...)
 }
-plot_map(d, combo_mn, cex=0.5)
+plot_map(d, total_mn, cex=0.5)
 plot_map(d, fgr, cex=0.5)
 plot_map(d, hill, cex=0.5)
 
@@ -124,7 +76,7 @@ head(d)
         }
 
 }
-plot_map_fg(d, combo_mn, cex=0.5)
+plot_map_fg(d, total_mn, cex=0.5)
 
 
 tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
@@ -144,7 +96,7 @@ for (i in 1:nfg) {
 
 
 
-plot(tmp$kgha, d$combo_mn)
+plot(tmp$kgha, d$total_mn)
 
 
 head(d)
@@ -180,7 +132,7 @@ plot_map(tmp, hill, cex=0.5)
 # # dev.off()
 # rm(tmp)
 # # map Combined biomass
-# p1 <- ggplot(d, aes(x=lon, y=lat, colour=combo)) +
+# p1 <- ggplot(d, aes(x=lon, y=lat, colour=total)) +
 #      labs(y='Latitude', x='Longitude') +
 #      coord_map('mercator',xlim=c(-108.45,-108.36),ylim=c(46.51,46.6)) +
 #      geom_point(shape=19, alpha=.5, size=rel(1.25)) +
