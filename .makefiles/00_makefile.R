@@ -1,178 +1,40 @@
 ######################################################################
 
 ####    Pre-processing data    ####
-# rm(list=ls())
-# require(plyr)           # for data processing
-# require(reshape2)       # for data processing
-# require(vegan)          # for ecological tasks (Hill numbers and NMS)
+rm(list=ls())
 devtools::install_github('phytomosaic/grlyr')
 require(grlyr)
 require(viridisLite)    # for color scales
+require(plyr)           # for data processing
+require(reshape2)       # for data processing
+require(vegan)          # for ecological tasks (Hill numbers and NMS)
 citation('grlyr') # please cite in publications
 ?est
+?cal
 
+###   load data: FIA interior Alaska estimation points
+data(est)
+head(est)
 
-# ### 2017 Plant and Soil data (really 2014 intak data)
-# rm(list=ls())
-# load('~/papers_submitted/_old_2011-2017/2017_PlantAndSoil_interiorAKcarbon/revised_31Aug2017/Ch2_S2_data.rda')
-# rm(d1,d2,d3,d4,d)
-# est <- df
-# ### fuzz coordinates before making public data
-# est$nlat <- est$lat
-# est$nlon <- est$lon
-# est$lat  <- est$lon <- NA
-# set.seed(271)
-# for (i in unique(est$pid)){
-#         est$lon[est$pid == i] <- est$nlon[est$pid == i] +
-#                 runif(1, -0.1, 0.1)
-#         est$lat[est$pid == i] <- est$nlat[est$pid == i] +
-#                 runif(1, -0.1, 0.1)
-# }
-# # est <- est[,!colnames(est) %in% c('nlon','nlat','hist_office_elev')]
-# names(est)[names(est)=='gf'] <- 'fg'
-# names(est)[names(est)=='pid'] <- 'plot'
-# est$depth <- est$depth / 2.54
-# est$depth <- as.numeric(
-#         as.character(
-#                 cut(est$depth,
-#                     breaks=c(0,0.3125*(2^(0:7))),
-#                     labels=0.3125*(2^(0:7))))
-# )
-# keeps <- c('plot', 'microquad', 'fg', 'cover', 'depth',
-#            'subp', 'transect', 'condid', 'condid_plot',
-#            'condid_subp', 'condid_grlyr', 'cond_status_cd',
-#            'microquad_status_cd', 'subpcond', 'duffdep', 'litterdep',
-#            'treecv', 'shrbcv', 'forbcv', 'grascv', 'seedct',
-#            'slope', 'aspect', 'aspfold', 'pdir', 'htld',
-#            'fldage', 'gps_elev', 'julian', 'lat', 'lon')
-# all(keeps %in% names(est))
-# est <- est[,keeps]
-# save(est, file='C:/Users/Rob/Documents/_prj/grlyr/data/est.rda')
-
-###   load data
-data(cal, est)
-x <- est        # FIA interior Alaska estimation points
+### calculate biomass using the calc_biomass function
+x <- calc_biomass(est)
 rm(est)
-head(x)
+dim(x)
 
-###   check data
-check_dat(est)  # expect TRUE
-
-
-###   data checks
-
-# checks for functional groups
-fg_forest <- c('CC','CO',
-               'LF','LLFOL','LLFRU','LNFOL','LNFRU',
-               'MF','MN','MS','MT',
-               'VF','VS')
-orgtype_f <- c(rep('lich',2),rep('lich',5),rep('moss',4),rep('moss',2))
-fg_rangel <- c('CBIND', 'CCYANO', 'CN', 'CO', 'CROCK', 'CSOIL',
-               'LF','LLFOL','LLFRU','LNFOL','LNFRU',
-               'MF','MN','MS','MT',
-               'VF','VS')
-orgtype_r <- c(rep('crust',6),rep('lich',5),rep('moss',4),rep('moss',2))
-# fg_milton <- c('MF', 'MN', 'MS', 'MT', 'MTL', 'VF', 'VS',
-#         'LLFOL', 'LLFRU',
-#         'CBIND', 'CCYANO', 'CN', 'CO', 'CROCK', 'CSOIL', 'NOS')
-# orgtype_milton <- c(rep('moss',7), rep('lich',2), rep('crust',7))
-isforest <- all(x$fg %in% fg_forest)
-israngel <- all(x$fg %in% fg_rangel)
-if (!isforest & !israngel) {
-        stop('functional groups in `x$fg` not valid')
-}
-orgtype <- if (isforest) orgtype_f else orgtype_r
-
-# checks for cover classes
-cvr_fia <- c(0, 1, 2 ,3, 4, 5, 6, 7, 8, 9, 10)        # for FIA
-cvr_pct <- c(0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99) # for pct
-cvr_mid <- c(0, 0.001, 0.005, 0.015, 0.035, 0.075, 0.175, 0.375,
-             0.625, 0.85, 0.975)  # if already pct midpoints
-is_cfia <- all(x$cover %in% cvr_fia)
-is_cpct <- all(x$cover %in% cvr_pct)
-is_cmid <- all(x$cover %in% cvr_mid)
-if (!is_cfia & !is_cpct & !is_cmid) {
-        stop('cover classes in `x$cover` not valid')
-}
-cvrclass <- if (is_cfia) cvr_fia
-cvrclass <- if (is_cpct) cvr_pct
-cvrclass <- if (is_cmid) cvr_mid
-
-# checks for depth classes
-dep_in <- c(0,0.125*(2^(0:7)))  # upper bounds (inches)
-dep_cm <- c(0,0.3125*(2^(0:7))) # upper bounds (cm)
-dep_it <- 0:8                  # if integer
-is_din <- all(x$depth %in% dep_in)
-is_dcm <- all(x$depth %in% dep_cm)
-is_dit <- all(x$depth %in% dep_it)
-if (!is_din & !is_dcm & !is_dit) {
-        stop('depth classes in `x$depth` not valid')
-}
-depclass <- if (is_din) dep_in
-depclass <- if (is_dcm) dep_cm
-depclass <- if (is_dit) dep_it
-
-
-if (!all(x$depth %in% depclass)) {
-        stop('depth classes in `x$depth` not valid (check units?)')
-}
-
-
-
-sort(unique(x$cover))
-head(x)
-names(x)
+### aggregate
 
 
 
 
-
-# pre-allocate a few vectors
-x$volume <- x$cvalue <- x$nvalue <- x$predCN <- x$preddens <-
-        x$mass <- x$predC <- x$predN <- x$type <- NA
-# convert cover classes to midpoint percentage values
-x$cover   <- mapvalues(x$cover, from=cvrclass, to=cvr_mid, warn=F)
-x$covercm <- x$cover * 1000      # convert plot cover to square cm
-x$depth   <- x$depth * 2.54      # convert depth to cm
-x$volume  <- x$depth * x$covercm # calc volume in cubic cm
-x$mpid    <- paste0(x$pid, '_',
-                    formatC(x$microquad,width=2,format='d',flag ='0'))
-# assign organism type
-x$type    <- mapvalues(x$fg, from=fg, to=orgtype, warn=F)
-x         <- arrange(x, pid, microquad)
-
-### check
-if (!diff(range(table(x$fg))) < .Machine$double.eps ^ 0.5) {
-        message('adding zero values for unobserved functional groups')
-        ###   TODO   ###
-}
-
-###   calc biomass, C, N, CN from 2013 calibration data
-# N differs by fxnl grp in calibrn set, so assign by fxnl grp means
-grps <- ddply(cal, .(fg), summarize, meann=round(mean(n, na.rm=T),2))
-crwk <- data.frame(news=levels(x$fg),# crosswalk old fxnl grps to new
-                   olds=c('C','C','E','C','C','C',
-                          'L','L','A','A','E'),
-                   c=mean(cal$c, na.rm=T), n=NA)
-crwk$n   <- grps$meann[match(crwk$olds, grps$fg)]   # match n%
-x$cvalue <- crwk$c [match(x$fg, crwk$news)]         # assign c%
-x$nvalue <- crwk$n [match(x$fg, crwk$news)]         # assign n%
-# neg exp model to predict for implementation plots
-f2 <- deriv3( ~ Const+a*exp(-b*depth), c('Const','a','b'),
-              function(Const,a,b,depth) NULL)
-m2 <- nls(dens~f2(Const,a,b,depth),data=cal,
-          start = list(Const=0.5,a=0.01,b=0.5))
-preddens    <- predict(m2, newdata=list(depth=x$depth))
-x$preddens  <- preddens[1:length(preddens)] # predicted density (g/cm^3)
-x$mass      <- x$preddens * x$volume      # mass      (g/microplot)
-x$predC     <- x$mass * x$cvalue/100      # organic C (g/microplot)
-x$predN     <- x$mass * x$nvalue/100      # total N   (g/microplot)
-x$predCN    <- x$predC / x$predN          # CN ratio
-rm(cal, grps, crwk, m2, f2, preddens)
-### end pre-processing section ####
 
 ######################################################################
 ####    Aggregate to plot level    ####
+
+# check
+if (!inherits(x, "grlyr")) {
+        stop('must inherit from `grlyr`')
+}
+
 
 ### Aggregate for FXNL GRPS:
 # SE function returns '0' instead of NA for zero-length vectors
@@ -185,7 +47,7 @@ rm(cal, grps, crwk, m2, f2, preddens)
         }
 }
 # mean and SE of growth forms within each plot...
-tmp <- ddply(x, .(fg, pid), summarize,
+tmp <- ddply(x, .(fg, plot), summarize,
              massp  = mean(mass*100, na.rm=T),# kg/ha
              masssd = myse(mass*100, na.rm=T),# kg/ha
              c      = mean(predC*100, na.rm=T), # kg/ha
@@ -219,26 +81,26 @@ tmp <- ddply(x, .(mpid, type), summarize,
              mp_mass = round(sum(mass,na.rm=TRUE),4))
 tmp <- dcast(tmp, mpid ~ type, value.var = c('mp_mass') )
 tmp[is.na(tmp)] <- 0
-tmp$combo <- tmp$lich + tmp$moss + tmp$crust
-x <- join(tmp, x, by=c('mpid'), type='full', match='all') ; rm(tmp)
-x <- rename(x, c('moss'='mp_moss', 'lich'='mp_lich', # g/microplot
+tmp$combo <- tmp$lich + tmp$moss # + tmp$crust
+y <- join(tmp, x, by=c('mpid'), type='full', match='all') ; rm(tmp)
+y <- rename(y, c('moss'='mp_moss', 'lich'='mp_lich', # g/microplot
                  'crust'='mp_crust', 'combo'='mp_combo'))
-x <- ddply(x,.(mpid), mutate,                 # sum *within* mp
+y <- ddply(y, .(mpid), mutate,                  # sum *within* mp
            mp_c      = sum(predC, na.rm=TRUE), # g/microplot
            mp_n      = sum(predN, na.rm=TRUE), # g/microplot
            mp_vol    = sum(volume,na.rm=TRUE), # cm3/microplot
            mp_cover  = sum(cover, na.rm=TRUE)) # % per mp
 # aggregate to plot-level
-d <- ddply(x, .(pid), summarize,
+d <- ddply(y, .(plot), summarize,
            combo_mn = mean(mp_combo*100,na.rm=T),# kg/ha
            combo_sd = sd(mp_combo*100,  na.rm=T),# kg/ha
-           cv       = combosd/combo,             # CV ratio
+           cv       = combo_sd/combo_mn,             # CV ratio
            lich_mn  = mean(mp_lich*100,na.rm=T), # kg/ha
            lich_sd  = sd(mp_lich*100,  na.rm=T), # kg/ha
            moss_mn  = mean(mp_moss*100,na.rm=T), # kg/ha
            moss_sd  =  sd(mp_moss*100, na.rm=T), # kg/ha
-           crust_mn = mean(mp_crust*100,na.rm=T),# kg/ha
-           crust_sd =  sd(mp_crust*100, na.rm=T),# kg/ha
+           # crust_mn = mean(mp_crust*100,na.rm=T),# kg/ha
+           # crust_sd =  sd(mp_crust*100, na.rm=T),# kg/ha
            c_mn     = mean(mp_c*100,   na.rm=T), # kg/ha
            c_sd     =   sd(mp_c*100,   na.rm=T), # kg/ha
            n_mn     = mean(mp_n*100,   na.rm=T), # kg/ha
@@ -248,37 +110,99 @@ d <- ddply(x, .(pid), summarize,
            cover_mn = mean(mp_cover,na.rm=T),    # %
            cover_sd =  sd(mp_cover, na.rm=T),    # %
            matdepth_mn= mean(depth,      na.rm=T), # cm
-           lat     = head(na.omit(latdd),1),    # degrees
-           lon     = head(na.omit(londd),1))    # degrees
-d$fgr <- ddply(x[x$covercm != '0',,drop = T], .(pid), summarize,
+           lat     = head(na.omit(lat),1),    # degrees
+           lon     = head(na.omit(lon),1))    # degrees
+d$fgr <- ddply(y[y$covercm != '0',,drop = T], .(plot), summarize,
                fgr=length(unique(fg)))$fgr      # richness
-d    <- arrange(d, pid)
-dcast(x, mpid ~ fg, value.var='mass', drop=F)
-wide <- dcast(x, pid ~ fg, fun.aggregate=sum,value.var='mass',drop=F)
+d    <- arrange(d, plot)
+dcast(y, mpid ~ fg, value.var='mass', drop=F)
+wide <- dcast(y, plot ~ fg, fun.aggregate=sum,value.var='mass',drop=F)
 row.names(wide) <- wide[,1] ; wide <- wide[,-1]
-d <- cbind(d, hill = renyi(wide, scales=c(1),hill=T))
-tot <- data.frame(  # summaries of all 5 plots
-        pid='Mean of all 5 plots',
+d    <- cbind(d, hill = renyi(wide, scales=c(1),hill=T))
+nr   <- length(d$plot)
+tot  <- data.frame(
+        plot = paste('Mean of all', nr, 'plots'),
         t(data.frame(mean=apply(d[,-1], 2, mean, na.rm=T))))
 (summaries <- rbind(d, tot))
-
-# write.csv(tmpgf, 'milton_summary_fg.csv', row.names=F)
-# write.csv(summaries, 'milton_summary_plot.csv', row.names=F)
-# write.csv(x, 'milton_microquads.csv', row.names=F)
+tail(summaries)
+# write.csv(tmpgf, 'summary_fg.csv', row.names=F)
+# write.csv(summaries, 'summary_plot.csv', row.names=F)
+# write.csv(y, 'data_microquads.csv', row.names=F)
 #### end aggregate section ####
+
 
 ######################################################################
 
 ######################################################################
 ####    Plotting    ####
-# require(ggplot2)    # for plotting NMS
-# require(gridExtra)  # for arranging multiple ggplots
+
+`plot_map` <- function(x, xvar, log = TRUE, ...){
+        xvar <- paste0(substitute(xvar))
+        z <- if (log) log10(x[,xvar]) else x[,xvar]
+        plot(x$lon, x$lat, col=ecole::colvec(z, 99, alpha=0.9),
+             pch=16, las=1, bty='L', ...)
+}
+plot_map(d, combo_mn, cex=0.5)
+plot_map(d, fgr, cex=0.5)
+plot_map(d, hill, cex=0.5)
+
+
+# for disaggregating by functional groups
+head(d)
+`plot_map_fg` <- function(x, xvar, log = TRUE, ...){
+        xvar <- substitute(xvar)
+        tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
+        tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
+        tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
+        ufg <- sort(unique(tmp$fg))
+        nfg <- length(ufg)
+        ecole::set_par(nfg)
+        par(mfrow=c(4,4), las=1, bty='L')
+        for (i in 1:nfg) {
+                i <- 1
+                o <- tmp[tmp$fg == as.character(ufg[i]),]
+                plot_map(o, kgha, cex=0.5)
+        }
+
+}
+plot_map_fg(d, combo_mn, cex=0.5)
+
+
+tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
+tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
+tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
+ufg <- sort(unique(tmp$fg))
+nfg <- length(ufg)
+ecole::set_par(nfg)
+par(mfrow=c(4,4), las=1, bty='L')
+for (i in 1:nfg) {
+        i <- 1
+        o <- tmp[tmp$fg == as.character(ufg[i]),]
+        plot_map(o, kgha, cex=0.5)
+}
+
+
+
+
+
+plot(tmp$kgha, d$combo_mn)
+
+
+head(d)
+
+tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(mass*100, na.rm=T))
+tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
+tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
+plot_map(tmp, hill, cex=0.5)
+
+
+
 
 
 # # Biomass map (faceted by fxnl grp)
-# tmp <- ddply(x, .(pid, fg), summarize, kgha=mean(mass*100, na.rm=T))
-# tmp$lat  <- x$lat [match(tmp$pid, x$pid)]         # assign lat
-# tmp$lon  <- x$lon [match(tmp$pid, x$pid)]         # assign lon
+# tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(mass*100, na.rm=T))
+# tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
+# tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
 # p10 <- ggplot(tmp, aes(x=lon, y=lat, group=fg, colour=log(kgha,10))) +
 #      labs(y='Latitude', x='Longitude') +
 #      coord_map('mercator',xlim=c(-108.45,-108.36),ylim=c(46.51,46.6)) +
@@ -341,6 +265,43 @@ tot <- data.frame(  # summaries of all 5 plots
 
 
 ######  making datasets to save ###################################
+# ### 2017 Plant and Soil data (really 2014 intak data)
+# rm(list=ls())
+# load('~/papers_submitted/_old_2011-2017/2017_PlantAndSoil_interiorAKcarbon/revised_31Aug2017/Ch2_S2_data.rda')
+# rm(d1,d2,d3,d4,d)
+# est <- df
+# ### fuzz coordinates before making public data
+# est$nlat <- est$lat
+# est$nlon <- est$lon
+# est$lat  <- est$lon <- NA
+# set.seed(271)
+# for (i in unique(est$plot)){
+#         est$lon[est$plot == i] <- est$nlon[est$plot == i] +
+#                 runif(1, -0.1, 0.1)
+#         est$lat[est$plot == i] <- est$nlat[est$plot == i] +
+#                 runif(1, -0.1, 0.1)
+# }
+# # est <- est[,!colnames(est) %in% c('nlon','nlat','hist_office_elev')]
+# names(est)[names(est)=='gf'] <- 'fg'
+# names(est)[names(est)=='pid'] <- 'plot'
+# est$depth <- est$depth / 2.54
+# est$depth <- as.numeric(
+#         as.character(
+#                 cut(est$depth,
+#                     breaks=c(0,0.3125*(2^(0:7))),
+#                     labels=0.3125*(2^(0:7))))
+# )
+# keeps <- c('plot', 'microquad', 'fg', 'cover', 'depth',
+#            'subp', 'transect', 'condid', 'condid_plot',
+#            'condid_subp', 'condid_grlyr', 'cond_status_cd',
+#            'microquad_status_cd', 'subpcond', 'duffdep', 'litterdep',
+#            'treecv', 'shrbcv', 'forbcv', 'grascv', 'seedct',
+#            'slope', 'aspect', 'aspfold', 'pdir', 'htld',
+#            'fldage', 'gps_elev', 'julian', 'lat', 'lon')
+# all(keeps %in% names(est))
+# est <- est[,keeps]
+# save(est, file='C:/Users/Rob/Documents/_prj/grlyr/data/est.rda')
+#
 # ### 2013 calibration data
 # cal <- read.csv('~/_prj/9_intak/data_2013/data/2013biomass.csv',
 #                 header=T)
