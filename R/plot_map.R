@@ -25,13 +25,19 @@
 #' @details
 #' Color values are relativized for each graphical image; plotting
 #'      absolute values (when these differ among several plots) may
-#'      require anually feeding a color vector in the proper order.
+#'      require manually feeding a color vector in the proper order.
 #'
 #' @examples
 #' data(est)
 #' x <- calc_biomass(est)
 #' s <- summary_plot(x)
+#' s$lat <- x$lat[match(s$plot, x$plot)]  # match lat/lon to s
+#' s$lon <- x$lon[match(s$plot, x$plot)]  # match lat/lon to s
+#' par(mfrow=c(2,2))
 #' plot_map(s, total_mn, main='Total biomass')
+#' plot_map(s, moss_mn, main='Moss biomass')
+#' plot_map(s, lich_mn, main='Lichen biomass')
+#' plot_map(s, fgr, main='Functional grp richness')
 #'
 #' @export
 #' @rdname plot_map
