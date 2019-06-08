@@ -10,7 +10,7 @@ Depends: R (>= 3.6.0)
 Imports:
     plyr,
     reshape2,
-    vegan
+    viridisLite
 License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 LazyData: true
