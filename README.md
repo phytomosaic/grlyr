@@ -25,12 +25,10 @@ devtools::install_github('phytomosaic/grlyr')
 
 ## Load data
 
-Get the example dataset from Milton Ranch (2016):
+Get the example dataset of estimation points from interior Alaska:
 ```r
 require(grlyr)
-data(milton)
-x <- milton
-rm(milton)
+data(est)
 ```
 
 
@@ -38,15 +36,37 @@ rm(milton)
 
 Calculate biomass, C, N values:
 ```r
-head(x)  # TODO
+x <- calc_biomass(est)
+rm(est)
+```
+
+
+## Summaries
+
+The expected level of summarization for USFS-FIA purposes is at the plot-level:
+```r
+s <- summary_plot(x)
+```
+
+...but you can also summarize by functional groups, either across all plots or within each:
+```r
+summary_fg(x)
+summary_fg(x, eachplot=TRUE)
 ```
 
 
 ## Mapping
 
-Map biomass, C, N values in geographic space:
+Map biomass, C, N, and functional group richness in geographic space:
 ```r
-head(x)  # TODO
+s$lat <- x$lat[match(s$plot, x$plot)]  # match lat/lon to s
+s$lon <- x$lon[match(s$plot, x$plot)]  # match lat/lon to s
+par(mfrow=c(2,2))
+plot_map(s, total_mn, main='Total biomass')
+plot_map(s, c_mn, main='Moss biomass')
+plot_map(s, n_mn, main='Lichen biomass')
+plot_map(s, fgr, main='Functional grp richness')
 ```
+
 
 Please contact `smithr2@oregonstate.edu` for questions or updates.
