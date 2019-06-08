@@ -23,11 +23,19 @@ devtools::install_github('phytomosaic/grlyr')
 ```
 
 
+## Further information
+
+```r
+require(grlyr)    # load the package
+citation('grlyr') # please cite in publications
+?est              # find a help file 
+```
+
+
 ## Load data
 
 Get the example dataset of estimation points from interior Alaska:
 ```r
-require(grlyr)
 data(est)
 ```
 
