@@ -63,6 +63,17 @@ summary_fg(x, eachplot=TRUE)
 ```
 
 
+## Plot values faceted by groups
+
+Distribution of plot values by functional group, with lines at the 25th, 50th, 75th percentiles:
+```r
+fg <- summary_fg(x, eachplot=TRUE)
+fg$logmass <- log10(fg$mass+1)
+plot_facet(fg, 'logmass', by='fg', type='hist', breaks=33,
+           xlab='Biomass (kg ha)', ylab='Frequency')
+```
+
+
 ## Mapping
 
 Map biomass, C, N, and functional group richness in geographic space:
