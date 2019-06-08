@@ -1,13 +1,9 @@
 ######################################################################
 
-####    Pre-processing data    ####
+### install and attach 'grlyr' package
 rm(list=ls())
 devtools::install_github('phytomosaic/grlyr')
 require(grlyr)
-require(viridisLite)    # for color scales
-# require(plyr)           # for data processing
-# require(reshape2)       # for data processing
-# require(vegan)          # for ecological tasks (Hill numbers and NMS)
 
 ### for further information
 citation('grlyr') # please cite in publications
@@ -36,21 +32,18 @@ plot_map(s, total_mn, main='Total biomass')
 plot_map(s, moss_mn, main='Moss biomass')
 plot_map(s, lich_mn, main='Lichen biomass')
 plot_map(s, fgr, main='Functional grp richness')
-cc <- colvec(log10(c(s$total_mn, s$moss_mn, s$lich_mn)+1), alpha=0.95)
-plot_map(s, total_mn, col=cc[(1:NROW(s))+NROW(s)*0], main='Total biomass')
-plot_map(s, moss_mn,  col=cc[(1:NROW(s))+NROW(s)*1], main='Moss biomass')
-plot_map(s, lich_mn,  col=cc[(1:NROW(s))+NROW(s)*2], main='Lichen biomass')
-
-summary_plot
+# cc <- colvec(log10(c(s$total_mn, s$moss_mn, s$lich_mn)+1), alpha=0.95)
+# plot_map(s, total_mn, col=cc[(1:NROW(s))+NROW(s)*0], main='Total biomass')
+# plot_map(s, moss_mn,  col=cc[(1:NROW(s))+NROW(s)*1], main='Moss biomass')
+# plot_map(s, lich_mn,  col=cc[(1:NROW(s))+NROW(s)*2], main='Lichen biomass')
 
 
 
 
 # for disaggregating by functional groups
-head(d)
 `plot_map_fg` <- function(x, xvar, log = TRUE, ...){
         xvar <- substitute(xvar)
-        tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
+        tmp  <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
         tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
         tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
         ufg <- sort(unique(tmp$fg))
@@ -62,7 +55,6 @@ head(d)
                 o <- tmp[tmp$fg == as.character(ufg[i]),]
                 plot_map(o, kgha, cex=0.5)
         }
-
 }
 plot_map_fg(d, total_mn, cex=0.5)
 
@@ -85,11 +77,9 @@ for (i in 1:nfg) {
 
 
 plot(tmp$kgha, d$total_mn)
-
-
 head(d)
 
-tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(mass*100, na.rm=T))
+tmp      <- ddply(x, .(plot, fg), summarize, kgha=mean(mass*100, na.rm=T))
 tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
 tmp$lon  <- x$lon [match(tmp$plot, x$plot)]         # assign lon
 plot_map(tmp, hill, cex=0.5)
