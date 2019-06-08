@@ -23,15 +23,16 @@ Estimates biomass, carbon and nitrogen of moss and lichen ground
 
 
      \code{\link{check_dat}} checks that estimation data are in
-     proper format.
+     proper format.\cr
      \code{\link{calc_biomass}} is the core function to calculate
-     ground layer metrics (prominently including biomass).
+     ground layer metrics (prominently including biomass).\cr
      \code{\link{summary_plot}} produces summaries at the
      plot-level, the expected level of summarization for USFS-FIA.
+     \cr
      \code{\link{summary_fg}} produces summaries at the level of
-     functional groups.
+     functional groups.\cr
      \code{\link{plot_map}} plots a map of geographic locations
-     colored by some value.
+     colored by some value.\cr
      \code{\link{plot_facet}} plots a scatterplot or histogram of
      values faceted by some grouping variable (such as functional
      groups).
