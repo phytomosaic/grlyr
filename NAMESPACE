@@ -2,5 +2,6 @@
 
 export(calc_biomass)
 export(check_dat)
+export(plot_map)
 export(summary_fg)
 export(summary_plot)

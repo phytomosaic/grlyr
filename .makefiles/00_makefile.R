@@ -5,14 +5,14 @@ rm(list=ls())
 devtools::install_github('phytomosaic/grlyr')
 require(grlyr)
 require(viridisLite)    # for color scales
-require(plyr)           # for data processing
-require(reshape2)       # for data processing
-require(vegan)          # for ecological tasks (Hill numbers and NMS)
+# require(plyr)           # for data processing
+# require(reshape2)       # for data processing
+# require(vegan)          # for ecological tasks (Hill numbers and NMS)
 
-# ### for further information
-# citation('grlyr') # please cite in publications
-# ?est
-# ?cal
+### for further information
+citation('grlyr') # please cite in publications
+?est
+?cal
 
 ###   load data: FIA interior Alaska estimation points
 data(est)
@@ -29,33 +29,21 @@ summary_fg(x, eachplot=TRUE)
 s <- summary_plot(x)
 
 ### plots and maps
+s$lat <- x$lat[match(s$plot, x$plot)]  # match lat/lon to s
+s$lon <- x$lon[match(s$plot, x$plot)]  # match lat/lon to s
+par(mfrow=c(2,2))
+plot_map(s, total_mn, main='Total biomass')
+plot_map(s, moss_mn, main='Moss biomass')
+plot_map(s, lich_mn, main='Lichen biomass')
+plot_map(s, fgr, main='Functional grp richness')
+cc <- colvec(log10(c(s$total_mn, s$moss_mn, s$lich_mn)+1), alpha=0.95)
+plot_map(s, total_mn, col=cc[(1:NROW(s))+NROW(s)*0], main='Total biomass')
+plot_map(s, moss_mn,  col=cc[(1:NROW(s))+NROW(s)*1], main='Moss biomass')
+plot_map(s, lich_mn,  col=cc[(1:NROW(s))+NROW(s)*2], main='Lichen biomass')
 
-head(x)
-head(s)
-dim(x)
-dim(s)
-
-### match lat/lon to s
+summary_plot
 
 
-
-######################################################################
-######################################################################
-######################################################################
-######################################################################
-######################################################################
-######################################################################
-####    Plotting    ####
-
-`plot_map` <- function(x, xvar, log = TRUE, ...){
-        xvar <- paste0(substitute(xvar))
-        z <- if (log) log10(x[,xvar]) else x[,xvar]
-        plot(x$lon, x$lat, col=ecole::colvec(z, 99, alpha=0.9),
-             pch=16, las=1, bty='L', ...)
-}
-plot_map(d, total_mn, cex=0.5)
-plot_map(d, fgr, cex=0.5)
-plot_map(d, hill, cex=0.5)
 
 
 # for disaggregating by functional groups
