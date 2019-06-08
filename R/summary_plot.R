@@ -31,16 +31,16 @@
      }
      cat('\n...may take a few seconds...\n\n')
      # first, sum per mq for ea 'type', then both moss/lich summed
-     y <- plyr::ddply(x, plyr::.(mpid, type), plyr::summarize,
+     y <- plyr::ddply(x, plyr::.(mqid, type), plyr::summarize,
                       mq_mass = sum(mass, na.rm=TRUE))
      y <- reshape2::dcast(
-          y, mpid ~ type, fill=0, value.var=c('mq_mass'))
+          y, mqid ~ type, fill=0, value.var=c('mq_mass'))
      y$total <- y$lich + y$moss
-     y <- plyr::join(x, y, by=c('mpid'), type='full', match='all')
+     y <- plyr::join(x, y, by=c('mqid'), type='full', match='all')
      y <- plyr::rename(y, c('moss'='mq_moss', 'lich'='mq_lich',
                             'total'='mq_total'))
      # sum *within* microquads
-     y <- plyr::ddply(y, plyr::.(mpid), plyr::mutate,
+     y <- plyr::ddply(y, plyr::.(mqid), plyr::mutate,
                       mq_c      = sum(predC, na.rm=TRUE), # g/mq
                       mq_n      = sum(predN, na.rm=TRUE), # g/mq
                       mq_vol    = sum(volume,na.rm=TRUE), # cm3/mq

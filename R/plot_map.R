@@ -1,4 +1,4 @@
-#' @title Plot a map of estimation plots
+#' @title Map of estimation plots
 #'
 #' @description
 #' Map geographic plot locations, colored by value.

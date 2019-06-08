@@ -8,7 +8,7 @@ check_dat(x, ...)
 }
 \arguments{
 \item{x}{data.frame containing the columns
-\code{c("pid","microquad","gf","cover","depth")}.  Each row is
+\code{c("plot","microquad","gf","cover","depth")}.  Each row is
 an observation for each functional grp within a}
 
 \item{...}{further arguments (currently ignored).}

@@ -8,15 +8,15 @@ calc_biomass(x, ...)
 }
 \arguments{
 \item{x}{data.frame, minimally containing the columns
-\code{c("pid","microquad","gf","cover","depth")}.  Each row is
-an observation for each functional grp within a microplot,
+\code{c("plot","microquad","gf","cover","depth")}.  Each row is
+an observation for each functional grp within a microquad,
 nested within transects > subplots > plots.}
 
 \item{...}{further arguments (currently ignored).}
 }
 \value{
 A data.frame of same number of rows as `x`, with new columns:
-   'mpid', 'type', 'predCN', 'predN', 'predC', 'mass', 'dens',
+   'mqid', 'type', 'predCN', 'predN', 'predC', 'mass', 'dens',
    'nvalue', 'cvalue', 'volume', 'covercm'.
 }
 \description{

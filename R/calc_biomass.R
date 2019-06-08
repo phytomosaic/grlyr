@@ -5,15 +5,15 @@
 #'     for density variation with ground layer depth.
 #'
 #' @param x data.frame, minimally containing the columns
-#'     \code{c("pid","microquad","gf","cover","depth")}.  Each row is
-#'     an observation for each functional grp within a microplot,
+#'     \code{c("plot","microquad","gf","cover","depth")}.  Each row is
+#'     an observation for each functional grp within a microquad,
 #'     nested within transects > subplots > plots.
 #'
 #' @param ... further arguments (currently ignored).
 #'
 #' @return
 #' A data.frame of same number of rows as `x`, with new columns:
-#'    'mpid', 'type', 'predCN', 'predN', 'predC', 'mass', 'dens',
+#'    'mqid', 'type', 'predCN', 'predN', 'predC', 'mass', 'dens',
 #'    'nvalue', 'cvalue', 'volume', 'covercm'.
 #'
 #' @details
@@ -47,13 +47,15 @@
 
      # check column names
      if (!check_dat(x)){
-          stop('check column names')
+          stop('check column names:
+               first 5 column names must be:
+                 "plot"  "microquad"  "gf"  "cover"  "depth"')
      }
 
      # pre-allocate a few vectors
      x$volume <- x$cvalue <- x$nvalue <-
           x$dens <- x$mass <- x$predC <- x$predN <-
-          x$predCN <- x$type <- x$mpid <- NA
+          x$predCN <- x$type <- x$mqid <- NA
 
      # checks for functional groups
      fg_forest <- c('CC','CO',
@@ -109,16 +111,16 @@
           if (is_dcm) { dep_cm } else {
                if (is_dit) { dep_it } else { NULL }}}
 
-     # checks for microplot unique identifier
+     # checks for microquad unique identifier
      `f` <- function(xx) {
           formatC(xx, width=2, format = 'd', flag ='0')
      }
      if (all(sort(unique(x$microquad)) == c(5,10,15,20))) {
-          x$mpid <- paste(f(x$plot), f(x$subp), f(x$transect),
+          x$mqid <- paste(f(x$plot), f(x$subp), f(x$transect),
                           f(x$microquad),sep='_')
      } else {
           if (all(sort(unique(x$microquad)) == 1:32)) {
-               x$mpid <- paste0(x$plot, '_', f(x$microquad))
+               x$mqid <- paste0(x$plot, '_', f(x$microquad))
           } else {
                stop('values in `x$microquad` not valid')
           }
@@ -132,13 +134,13 @@
      if (is_din) { x$depth   <- x$depth * 2.54 }
 
      # calc volume in cubic cm
-     x$volume  <- x$depth * x$covercm
+     x$volume <- x$depth * x$covercm
 
      # assign organism type
-     x$type    <- plyr::mapvalues(x$fg, from=fg, to=orgtype, warn=F)
+     x$type <- plyr::mapvalues(x$fg, from=fg, to=orgtype, warn=F)
 
      # order the data.frame by plot then microquad
-     x         <- plyr::arrange(x, plot, microquad)
+     x <- plyr::arrange(x, plot, microquad)
 
      # negative exponential model from 2013 calibration data
      grps <- plyr::ddply(cal, plyr::.(fg), plyr::summarize,
@@ -154,9 +156,9 @@
                       start = list(Const=0.5,a=0.01,b=0.5))
      dens     <- predict(m2, newdata=list(depth=x$depth))
      x$dens   <- dens[1:length(dens)]  # density   (g/cm^3)
-     x$mass   <- x$dens * x$volume     # mass      (g/microplot)
-     x$predC  <- x$mass * x$cvalue/100 # organic C (g/microplot)
-     x$predN  <- x$mass * x$nvalue/100 # total N   (g/microplot)
+     x$mass   <- x$dens * x$volume     # mass      (g/microquad)
+     x$predC  <- x$mass * x$cvalue/100 # organic C (g/microquad)
+     x$predN  <- x$mass * x$nvalue/100 # total N   (g/microquad)
      x$predCN <- x$predC / x$predN     # C:N ratio
      class(x) <- c('grlyr', class(x))
      return(x)

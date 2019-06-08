@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_map.R
 \name{plot_map}
 \alias{plot_map}
-\title{Plot a map of estimation plots}
+\title{Map of estimation plots}
 \usage{
 plot_map(x, xvar, log = TRUE, col, xlab, ylab, ...)
 }

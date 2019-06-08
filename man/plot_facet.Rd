@@ -16,8 +16,8 @@ plotted.}
 \item{by}{name of grouping variable in \code{data}.}
 
 \item{free}{one of \code{c('none','x','y','xy')}, defining which
-axes will be freely varying; otherwise axes will be identical
-among all facets.}
+axes will freely vary; otherwise axes will be identical among
+all facets.}
 
 \item{type}{one of \code{'plot'} or \code{'hist'}, defining which
 type of plot.}
@@ -35,7 +35,8 @@ Scatterplot or histogram faceted by groups.
 }
 \details{
 Useful for disaggregating by some grouping variable, either as a
-     bivariate scatterplot or univariate histogram.
+     bivariate scatterplot (\code{'type = plot'}) or univariate
+     histogram (\code{'type = hist'}).
 }
 \examples{
 data(est)
