@@ -48,8 +48,7 @@
                 vol    = mean(volume*0.1, na.rm=T), # m3/ha
                 volsd  = grlyr:::se(volume*0.1, na.rm=T),   # m3/ha
                 coverp = mean(cover*100,na.rm=T),   # pct points
-                coversd= grlyr:::se(cover*100, na.rm=T),    # pct points
-                .progress='time' )
+                coversd= grlyr:::se(cover*100, na.rm=T))# pct points
         names(fg_inplot) <- gsub('\\p$', '', names(fg_inplot))
         if (eachplot){
                 return(fg_inplot)
@@ -66,8 +65,7 @@
                 vol    = mean(vol,    na.rm=T), # m3/ha
                 volsd  = mean(volsd,  na.rm=T), # m3/ha
                 cover  = mean(cover, na.rm=T), # pct points
-                coversd= mean(coversd,na.rm=T), # pct points
-                .progress='time' )
+                coversd= mean(coversd,na.rm=T)) # pct points
         fg_allplot <- data.frame(
                 fg=fg_allplot[,1], round(fg_allplot[,-1], 1))
         fg_allplot

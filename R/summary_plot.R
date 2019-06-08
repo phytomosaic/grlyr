@@ -29,26 +29,22 @@
      if (!inherits(x, "grlyr")) {
           stop('must inherit from `grlyr`')
      }
-     cat('step 1 of 3\n')
+     cat('\n...may take a few seconds...\n\n')
      # first, sum per mq for ea 'type', then both moss/lich summed
      y <- plyr::ddply(x, plyr::.(mpid, type), plyr::summarize,
-                      mq_mass = sum(mass, na.rm=TRUE),
-                      .progress='time')
+                      mq_mass = sum(mass, na.rm=TRUE))
      y <- reshape2::dcast(
           y, mpid ~ type, fill=0, value.var=c('mq_mass'))
      y$total <- y$lich + y$moss
      y <- plyr::join(x, y, by=c('mpid'), type='full', match='all')
      y <- plyr::rename(y, c('moss'='mq_moss', 'lich'='mq_lich',
                             'total'='mq_total'))
-     cat('step 2 of 3\n')
      # sum *within* microquads
      y <- plyr::ddply(y, plyr::.(mpid), plyr::mutate,
                       mq_c      = sum(predC, na.rm=TRUE), # g/mq
                       mq_n      = sum(predN, na.rm=TRUE), # g/mq
                       mq_vol    = sum(volume,na.rm=TRUE), # cm3/mq
-                      mq_cover  = sum(cover, na.rm=TRUE), # %/mq
-                      .progress='time')
-     cat('step 3 of 3\n')
+                      mq_cover  = sum(cover, na.rm=TRUE)) # %/mq
      # aggregate to plot-level
      d <- plyr::ddply(y, plyr::.(plot), plyr::summarize,
                       total_mn = mean(mq_total*100,na.rm=T),# kg/ha
@@ -66,13 +62,13 @@
                       cover_mn = mean(mq_cover,na.rm=T),    # %
                       cover_sd =   sd(mq_cover,na.rm=T),    # %
                       depth_mn = mean(depth, na.rm=T),      # cm
-                      depth_sd =   sd(depth, na.rm=T),      # cm
-                      .progress='time')
+                      depth_sd =   sd(depth, na.rm=T))      # cm
      # functional group richness per plot
      d$fgr <- plyr::ddply(y[y$covercm != '0',,drop = T],
                           plyr::.(plot), plyr::summarize,
                           fgr=length(unique(fg)))$fgr
      # order by plot
      d <- plyr::arrange(d, plot)
+     class(d) <- c('summary_plot', class(d))
      d
 }
