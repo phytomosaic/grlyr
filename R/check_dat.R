@@ -4,7 +4,7 @@
 #' Verifies proper data format before further processing.
 #'
 #' @param x data.frame containing the columns
-#'     \code{c("plot","microquad","gf","cover","depth")}.  Each row is
+#'     \code{c("plot","microquad","fg","cover","depth")}.  Each row is
 #'     an observation for each functional grp within a
 #      microquad, nested within transects > subplots > plots.
 #'

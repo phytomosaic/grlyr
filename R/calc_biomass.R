@@ -5,7 +5,7 @@
 #'     for density variation with ground layer depth.
 #'
 #' @param x data.frame, minimally containing the columns
-#'     \code{c("plot","microquad","gf","cover","depth")}.  Each row is
+#'     \code{c("plot","microquad","fg","cover","depth")}.  Each row is
 #'     an observation for each functional grp within a microquad,
 #'     nested within transects > subplots > plots.
 #'

@@ -10,7 +10,8 @@
 #' data(est)
 #'
 #' @format
-#' A data.frame of 6256 observations in microquads.
+#' A data.frame of 6256 observations of functional groups in
+#'      microquads.
 #'
 #' @details
 #' Non-destructive measurements were collected for the US Forest

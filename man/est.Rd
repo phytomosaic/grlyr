@@ -4,7 +4,8 @@
 \name{est}
 \alias{est}
 \title{Estimation data}
-\format{A data.frame of 6256 observations in microquads.}
+\format{A data.frame of 6256 observations of functional groups in
+     microquads.}
 \usage{
 data(est)
 }
