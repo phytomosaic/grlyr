@@ -7,8 +7,7 @@ require(grlyr)
 
 ### for further information
 citation('grlyr') # please cite in publications
-?est
-?cal
+?est              # find help file
 
 ### load data: FIA interior Alaska estimation points
 data(est)
@@ -33,53 +32,14 @@ plot_map(s, moss_mn, main='Moss biomass')
 plot_map(s, lich_mn, main='Lichen biomass')
 plot_map(s, fgr, main='Functional grp richness')
 
-
-
-
-
-# cc <- colvec(log10(c(s$total_mn, s$moss_mn, s$lich_mn)+1), alpha=0.95)
-# plot_map(s, total_mn, col=cc[(1:NROW(s))+NROW(s)*0], main='Total biomass')
-# plot_map(s, moss_mn,  col=cc[(1:NROW(s))+NROW(s)*1], main='Moss biomass')
-# plot_map(s, lich_mn,  col=cc[(1:NROW(s))+NROW(s)*2], main='Lichen biomass')
-
-
-
-
-## data needs to be in a long format
-dat <- data.frame(position = c(1,2,3,2,3,5),
-                  score = c(450,220,330,333,423,988),
-                  z = c('x','x','x','y','y','y'))
-facet_wrap <- function(data, x, y, z, horiz = TRUE, ...) {
-        ## save current par settings and return after finished
-        op <- par(no.readonly = TRUE)
-        on.exit(par(op))
-        zz <- unique(data[, z])
-        ## sets up the layout to cascade horizontally or vertically
-        ## and sets xlim and ylim appropriately
-        if (horiz) {
-                par(mfrow = c(1, length(zz)), ...)
-                ylim <- range(data[, y])
-                xlim <- NULL
-        } else {
-                par(mfrow = c(length(zz), 1), ...)
-                xlim <- range(data[, x])
-                ylim <- NULL
-        }
-        ## make a subset of data for each unique by variable
-        ## and draw a basic plot for each one
-        for (ii in zz) {
-                tmp <- data[data[, z] %in% ii, ]
-                plot(tmp[, x], tmp[, y], xlim = xlim, ylim = ylim)
-        }
-}
-facet_wrap(dat, 'position', 'score', 'z', mar = c(5,4,2,2))
-
-
-
-
-
-
-
+### scatterplot or histogram faceted by groups
+fg <- summary_fg(x, eachplot=TRUE)
+fg$logmass <- log10(fg$mass+1)
+plot_facet(fg, 'cover', 'mass', by='fg', type='plot',
+           xlab='Plot cover (%)',
+           ylab=bquote('Biomass (kg' ~ha^-1*')'))
+plot_facet(fg, 'logmass', by='fg', type='hist', breaks=33,
+           xlab='Biomass', ylab='Frequency')
 
 
 
@@ -104,7 +64,7 @@ facet_wrap(dat, 'position', 'score', 'z', mar = c(5,4,2,2))
         }
 }
 plot_map_fg(d, total_mn, cex=0.5)
-
+ecole::set_par
 
 tmp <- ddply(x, .(plot, fg), summarize, kgha=mean(xvar, na.rm=T))
 tmp$lat  <- x$lat [match(tmp$plot, x$plot)]         # assign lat
