@@ -83,11 +83,20 @@ title='grlyr : Ground Layer Estimation'
                         of a functional group in one microquad).'),
                         p('Column names, and their values, must be:'),
                         tags$pre('`plot`\t\t= any values
-`microquad`\t= integers\t= 1 thru 32
+
+`microquad`\t= integers\t= 1 thru 32, or else 5,10,15,20 if
+\t\t\t\t\t `transect` is also supplied),
 `fg`\t\t= categories\t= CC, CO, LF, LLFOL, LLFRU, LNFOL, LNFRU,
 \t\t\t\t\t MF, MN, MS, MT, VF, VS
 `cover`\t\t= percentages\t= 0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99
+
 `depth`\t\t= inches\t= 0, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16'),
+                        p('Alternately, if you used the rangeland
+                          protocol, then:'),
+                        tags$pre('
+`fg`\t\t= categories\t= CBIND, CCYANO, CN, CO, CROCK, CSOIL,
+\t\t\t\t\t LF, LLFOL, LLFRU, LNFOL, LNFRU,
+\t\t\t\t\t MF, MN, MS, MT, VF, VS'),
                         p('Other values may \'work\' but give
                         nonsense. Missing values not permitted in
                           first 5 columns.'),
