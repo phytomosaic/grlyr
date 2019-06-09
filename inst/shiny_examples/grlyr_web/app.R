@@ -7,6 +7,10 @@
 require(shiny)
 require(grlyr)
 
+# dir <- system.file('shiny_examples', 'grlyr_web', package = 'grlyr')
+# setwd(dir)
+# shiny::shinyAppDir('.')
+
 u1 <- paste0(
         'https://www.fs.fed.us/pnw/rma/fia-topics/',
         'documentation/field-manuals/documents/Annual/',
@@ -17,9 +21,8 @@ acc <- c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
 `ui` <- fluidPage(fluidPage(
 
         ### title and headers
-        titlePanel(
-                div(HTML('<em>grlyr</em> : Ground Layer Estimation'))
-        ),
+        titlePanel(div(HTML('<em>grlyr</em> :
+                            Ground Layer Estimation'))),
         br(),
         h4('Estimates biomass, carbon and nitrogen of moss and
         lichen ground layers, as part of the US Forest Service\'s
@@ -65,7 +68,8 @@ acc <- c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
                           tableOutput('fg_summaries_contents')
                 )
         )
-)
+),
+title='grlyr : Ground Layer Estimation'
 )
 
 `server` <- function(input, output) {
@@ -101,6 +105,42 @@ acc <- c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
                         x   <- grlyr::calc_biomass( est )
                         o1  <- grlyr::summary_plot(x)
                         o2  <- grlyr::summary_fg(x)
+                        from <- c('plot',
+                                  'total_mn', 'total_sd',
+                                  'lich_mn', 'lich_sd',
+                                  'moss_mn', 'moss_sd',
+                                  'c_mn', 'c_sd',
+                                  'n_mn', 'n_sd',
+                                  'vol_mn', 'vol_sd',
+                                  'cover_mn', 'cover_sd',
+                                  'depth_mn', 'depth_sd',
+                                  'fgr')
+                        to <- c('Plot_id',
+                                'Mean_biomass', 'SD_biomass',
+                                'Mean_biomass_lichen',
+                                'SD_biomass_lichen',
+                                'Mean_biomass_mosses',
+                                'SD_biomass_mosses',
+                                'Mean_C', 'SD_C',
+                                'Mean_N', 'SD_N',
+                                'Mean_volume', 'SD_volume',
+                                'Mean_cover', 'SD_cover',
+                                'Mean_depth', 'SD_depth',
+                                'Functional_group_richness')
+                        colnames(o1)[colnames(o1) == from] <- to
+                        from <- c('fg',
+                                  'mass', 'masssd',
+                                  'c', 'csd',
+                                  'n', 'nsd',
+                                  'vol', 'volsd',
+                                  'cover', 'coversd')
+                        to <- c('Fxl_grp',
+                                'Mean_biomass', 'SD_biomass',
+                                'Mean_C', 'SD_C',
+                                'Mean_N', 'SD_N',
+                                'Mean_volume', 'SD_volume',
+                                'Mean_cover', 'SD_cover')
+                        colnames(o2)[colnames(o2) == from] <- to
                         list(o1 = o1, o2 = o2)
                 }
         })
@@ -175,5 +215,5 @@ acc <- c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
                 })
 }
 
-# ### run the shiny app
-# shinyApp(ui, server)
+### run the shiny app
+shinyApp(ui, server)
