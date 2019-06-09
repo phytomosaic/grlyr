@@ -13,7 +13,9 @@
 #'     involved in any modeling or analysis.
 #'
 #' @examples
-#' launch_app()
+#' \dontrun{
+#'     launch_app()
+#' }
 #'
 #' @export
 #' @rdname launch_app

@@ -19,6 +19,8 @@ Web app allows an external user to upload a file of observations,
     involved in any modeling or analysis.
 }
 \examples{
-launch_app()
+\dontrun{
+    launch_app()
+}
 
 }
