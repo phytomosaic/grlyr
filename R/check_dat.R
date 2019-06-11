@@ -23,7 +23,8 @@
 #' @rdname check_dat
 `check_dat` <- function(x, ...){
      isdf <- is.data.frame(x)
-     nm   <- dimnames(x)[[2]]
      vec  <- c('plot', 'microquad', 'fg', 'cover', 'depth')
-     all(isdf, nm[1:5] == vec)
+     nm   <- (dimnames(x)[[2]][1:5] == vec)
+     nona <- !anyNA(x[, 1:5])
+     all(isdf, nm, nona)
 }
