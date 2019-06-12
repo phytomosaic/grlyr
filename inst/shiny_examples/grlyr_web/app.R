@@ -46,7 +46,7 @@ acc <- c('text/csv', 'text/comma-separated-values,text/plain', '.csv')
                              'Summaries are automatic,
                              download them here:',
                              br(),br(),
-                             downloadButton('downloadData','Download'),
+                             downloadButton('dwnld','Download'),
                              tags$hr(),
                              h3('Further info'),
                              p('Source code: '),
@@ -81,25 +81,30 @@ title='grlyr : Ground Layer Estimation'
                         p('Your uploaded file must be a CSV file in
                         \'long\' format (each row is one observation
                         of a functional group in one microquad).'),
-                        p('Column names, and their values, must be:'),
+                        div(HTML('If you used the <b>FIA forestland
+                        protocol</b>, then column names and possible
+                        values, must be:')),
                         tags$pre('`plot`\t\t= any values
-
-`microquad`\t= integers\t= 1 thru 32, or else 5,10,15,20 if
-\t\t\t\t\t `transect` is also supplied),
+`microquad`\t= integers\t= 5,10,15,20
 `fg`\t\t= categories\t= CC, CO, LF, LLFOL, LLFRU, LNFOL, LNFRU,
 \t\t\t\t\t MF, MN, MS, MT, VF, VS
 `cover`\t\t= percentages\t= 0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99
-
-`depth`\t\t= inches\t= 0, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16'),
-                        p('Alternately, if you used the rangeland
-                          protocol, then:'),
-                        tags$pre('
+`depth`\t\t= inches\t= 0, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16
+`transect`\t= integers\t= 90, 270, 360, 180, 135, 315, 45, 225'),
+                        div(HTML('If you used the <b>rangeland variant
+                        protocol</b>, then column names and possible
+                        values, must be:')),
+                        tags$pre('`plot`\t\t= any values
+`microquad`\t= integers\t= 1 thru 32,
 `fg`\t\t= categories\t= CBIND, CCYANO, CN, CO, CROCK, CSOIL,
 \t\t\t\t\t LF, LLFOL, LLFRU, LNFOL, LNFRU,
-\t\t\t\t\t MF, MN, MS, MT, VF, VS'),
-                        p('Other values may \'work\' but give
-                        nonsense. Missing values not permitted in
+\t\t\t\t\t MF, MN, MS, MT, VF, VS
+`cover`\t\t= percentages\t= 0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99
+`depth`\t\t= inches\t= 0, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16'),
+                        p('Missing values not permitted in
                           first 5 columns.'),
+                        p('Metric values for `depth` are also
+                          accepted.'),
                         easyClose = TRUE
                 ))
         })
@@ -112,8 +117,8 @@ title='grlyr : Ground Layer Estimation'
                 } else {
                         est <- read.csv(inFile$datapath, header = T)
                         x   <- grlyr::calc_biomass( est )
-                        o1  <- grlyr::summary_plot(x)
-                        o2  <- grlyr::summary_fg(x)
+                        o1  <- grlyr::summary_plot( x )
+                        o2  <- grlyr::summary_fg( x )
                         from <- c('plot',
                                   'total_mn', 'total_sd',
                                   'lich_mn', 'lich_sd',
@@ -154,69 +159,62 @@ title='grlyr : Ground Layer Estimation'
                 }
         })
 
+
         ### render PLOT summaries
         output$plot_summaries_contents <- renderTable(
                 if (is.null( CALCS() )) {
                         return(NULL)
                 } else {
-                        # head(CALCS()$o1)
-                        from <- c('plot',
-                                  'total_mn', 'total_sd',
-                                  'lich_mn', 'lich_sd',
-                                  'moss_mn', 'moss_sd',
-                                  'c_mn', 'c_sd',
-                                  'n_mn', 'n_sd',
-                                  'vol_mn', 'vol_sd',
-                                  'cover_mn', 'cover_sd',
-                                  'depth_mn', 'depth_sd',
-                                  'fgr')
-                        to <- c('Plot_id',
-                                'Mean_biomass', 'SD_biomass',
-                                'Mean_biomass_lichen',
-                                'SD_biomass_lichen',
-                                'Mean_biomass_mosses',
-                                'SD_biomass_mosses',
-                                'Mean_C', 'SD_C',
-                                'Mean_N', 'SD_N',
-                                'Mean_volume', 'SD_volume',
-                                'Mean_cover', 'SD_cover',
-                                'Mean_depth', 'SD_depth',
-                                'Functional_group_richness')
                         xx <- CALCS()$o1
-                        colnames(xx)[colnames(xx) == from] <- to
-                        head( xx )
+                        xx[,-1] <- round(xx[,-1],1)
+                        uu <- c(' ',
+                                rep('(kg/ha)', 10),
+                                rep('(m3/ha)', 2),
+                                rep('(percentage)',2),
+                                rep('(cm)', 2), '(count)')
+                        dimnames(xx)[[2]] <-
+                                paste0(dimnames(xx)[[2]], '\n', uu)
+                        head(xx)
                 }
         )
 
         ### render FUNCTIONAL GROUP summaries
         output$fg_summaries_contents <- renderTable(
-                if (is.null( CALCS() ))
+                if (is.null( CALCS() )){
                         return(NULL)
-                else
-                        CALCS()$o2
+                } else {
+                        xx <- CALCS()$o2
+                        uu <- c('  ',
+                                rep('(kg/ha)', 6),
+                                rep('(m3/ha)', 2),
+                                rep('(percentage)',2))
+                        dimnames(xx)[[2]] <-
+                                paste0(dimnames(xx)[[2]], '\n', uu)
+                        xx
+                }
         )
 
-        ### dynamic headers only appear after summaries done
+        ### dynamic headers appear only after summaries done
         output$hdr1 <- renderText(
                 if (is.null( CALCS() ))
                         return(NULL)
                 else
-                        paste0('Preview plot summaries')
+                        paste0('Plot summary (preview)')
 
         )
         output$hdr2 <- renderText(
                 if (is.null( CALCS() ))
                         return(NULL)
                 else
-                        paste0('Functional group summaries')
+                        paste0('Functional group summary')
 
         )
 
         ### download the plot summaries
-        output$downloadData <- downloadHandler(
+        output$dwnld <- downloadHandler(
                 filename = function() {
                         paste('grlyr_summary_',
-                              format(Sys.time(), '%Y-%m-%d_%H-%M'),
+                              format(Sys.time(), '%Y-%m-%d_%H%M'),
                               '.csv', sep='')
                 },
                 content = function(file) {
