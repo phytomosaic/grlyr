@@ -106,7 +106,7 @@
         is_dcm <- all(x$depth %in% dep_cm)
         is_dcc <- all(x$depth %in% dep_cc)
         is_dit <- all(x$depth %in% dep_it)
-        if (!is_din & !is_dcm & !is_dit) {
+        if (!is_din & !is_dcm & !is_dcc & !is_dit) {
                 stop('depth classes in `x$depth` not valid')
         }
         depcls <- if (is_din) { dep_in } else {
