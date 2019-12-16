@@ -47,9 +47,9 @@
 
         # check column names
         if (!check_dat(x)){
-                stop('check column names:
-               first 5 column names must be:
-                 "plot"  "microquad"  "gf"  "cover"  "depth"')
+                stop('first 5 column names must be:
+                 "plot"  "microquad"  "gf"  "cover"  "depth"
+                     These columns must not have NA values.')
         }
 
         # pre-allocate a few vectors
@@ -133,14 +133,16 @@
         }
 
         # convert cover classes to midpoint percentage values
-        x$cover <- plyr::mapvalues(x$cover,from=cvrcls,to=cvr_mid,warn=F)
-        x$covercm <- x$cover * 1000 # convert percent cover to sq cm
+        x$cover  <-plyr::mapvalues(x$cover,from=cvrcls,to=cvr_mid,warn=F)
+        x$covercm<- x$cover * 1000 # convert percent cover to sq cm
 
-        # convert depth inches to cm (if needed)
-        if (is_din) { x$depth   <- x$depth * 2.54 }
+        # convert depth to midpoint cm values
+        dep_mid <- c(0, 0.158750, 0.4490128, 0.8980256, 1.7960512,
+                     3.5921024, 7.1842049, 14.3684098, 28.7368196)
+        x$depthcm<-plyr::mapvalues(x$depth,from=depcls,to=dep_mid,warn=F)
 
         # calc volume in cubic cm
-        x$volume <- x$depth * x$covercm
+        x$volume <- x$depthcm * x$covercm
 
         # assign organism type
         x$type <- plyr::mapvalues(x$fg, from=fg, to=orgtype, warn=F)
@@ -160,7 +162,7 @@
                             function(Const,a,b,depth) NULL)
         m2 <- stats::nls(dens~f2(Const,a,b,depth),data=cal,
                          start = list(Const=0.5,a=0.01,b=0.5))
-        dens     <- predict(m2, newdata=list(depth=x$depth))
+        dens     <- predict(m2, newdata=list(depth=x$depthcm))
         x$dens   <- dens[1:length(dens)]  # density   (g/cm^3)
         x$mass   <- x$dens * x$volume     # mass      (g/microquad)
         x$predC  <- x$mass * x$cvalue/100 # organic C (g/microquad)
