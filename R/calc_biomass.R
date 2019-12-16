@@ -158,12 +158,19 @@
         crwk$n   <- grps$meann[match(crwk$olds, grps$fg)] # match n%
         x$cvalue <- crwk$c [match(x$fg, crwk$news)]       # assign c%
         x$nvalue <- crwk$n [match(x$fg, crwk$news)]       # assign n%
-        f2 <- stats::deriv3(~Const+a*exp(-b*depth),c('Const','a','b'),
-                            function(Const,a,b,depth) NULL)
-        m2 <- stats::nls(dens~f2(Const,a,b,depth),data=cal,
-                         start = list(Const=0.5,a=0.01,b=0.5))
-        dens     <- predict(m2, newdata=list(depth=x$depthcm))
-        x$dens   <- dens[1:length(dens)]  # density   (g/cm^3)
+        # ### fit neg exp model with `stats::nls`
+        # f2 <- stats::deriv3(~Const+a*exp(-b*depth),c('Const','a','b'),
+        #                     function(Const,a,b,depth) NULL)
+        # m2 <- stats::nls(dens~f2(Const,a,b,depth),data=cal,
+        #                  start = list(Const=0.5,a=0.01,b=0.5))
+        # dens <- predict(m2, newdata=list(depth=x$depthcm))
+        # x$dens <- dens[1:length(dens)]
+        ### fit neg exp model manually (Smith et al. 2015)
+        m    <- 0.0205
+        a    <- 0.0512
+        b    <- (-0.3448)
+        dens <- m + a * exp(b * x$depthcm)
+        x$dens   <- dens                  # density   (g/cm^3)
         x$mass   <- x$dens * x$volume     # mass      (g/microquad)
         x$predC  <- x$mass * x$cvalue/100 # organic C (g/microquad)
         x$predN  <- x$mass * x$nvalue/100 # total N   (g/microquad)
