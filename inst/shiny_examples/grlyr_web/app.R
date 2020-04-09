@@ -98,7 +98,7 @@ title='grlyr : Ground Layer Estimation'
 `microquad`\t= integers\t= 1 thru 32,
 `fg`\t\t= categories\t= CBIND, CCYANO, CN, CO, CROCK, CSOIL,
 \t\t\t\t\t LF, LLFOL, LLFRU, LNFOL, LNFRU,
-\t\t\t\t\t MF, MN, MS, MT, VF, VS
+\t\t\t\t\t MF, MN, MS, MT, MTL, VF, VS
 `cover`\t\t= percentages\t= 0, 0.1, 1, 2, 5, 10, 25, 50, 75, 95, 99
 `depth`\t\t= inches\t= 0, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16'),
                         p('Missing values not permitted in
