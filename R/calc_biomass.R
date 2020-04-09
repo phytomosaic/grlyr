@@ -69,10 +69,11 @@
         fg_rangel <- c('CBIND', 'CCYANO', 'CN', 'CO', 'CROCK','CSOIL',
                        'LF','LLFOL','LLFRU','LNFOL','LNFRU',
                        'MF','MN','MS','MT',
-                       'VF','VS')
+                       'VF','VS',
+                       'MTL')
         orgtype_r <- c(rep('crust',6),rep('lich',5),
-                       rep('moss',4),rep('moss',2))
-        fg_cal_r  <- c(rep('C',4), fg_cal_f)
+                       rep('moss',4),rep('moss',3))
+        fg_cal_r  <- c(rep('C',4), fg_cal_f, 'A')
         isforest  <- all(x$fg %in% fg_forest)  # forestland protocol
         israngel  <- all(x$fg %in% fg_rangel)  # rangeland protocol
         if (!isforest & !israngel) {
@@ -115,6 +116,7 @@
                                 if (is_dit) { dep_it } else {
                                         NULL
                                 }}}}
+
         # checks for microquad unique identifier
         `f` <- function(xx) {
                 formatC(xx, width=2, format = 'd', flag ='0')
@@ -133,13 +135,15 @@
         }
 
         # convert cover classes to midpoint percentage values
-        x$cover  <-plyr::mapvalues(x$cover,from=cvrcls,to=cvr_mid,warn=F)
-        x$covercm<- x$cover * 1000 # convert percent cover to sq cm
+        x$cover  <- plyr::mapvalues(x$cover, from=cvrcls, to=cvr_mid,
+                                    warn=F)
+        x$covercm <- x$cover * 1000 # convert percent cover to sq cm
 
         # convert depth to midpoint cm values
         dep_mid <- c(0, 0.158750, 0.4490128, 0.8980256, 1.7960512,
                      3.5921024, 7.1842049, 14.3684098, 28.7368196)
-        x$depthcm<-plyr::mapvalues(x$depth,from=depcls,to=dep_mid,warn=F)
+        x$depthcm <- plyr::mapvalues(x$depth, from=depcls, to=dep_mid,
+                                     warn=F)
 
         # calc volume in cubic cm
         x$volume <- x$depthcm * x$covercm
@@ -158,14 +162,8 @@
         crwk$n   <- grps$meann[match(crwk$olds, grps$fg)] # match n%
         x$cvalue <- crwk$c [match(x$fg, crwk$news)]       # assign c%
         x$nvalue <- crwk$n [match(x$fg, crwk$news)]       # assign n%
-        # ### fit neg exp model with `stats::nls`
-        # f2 <- stats::deriv3(~Const+a*exp(-b*depth),c('Const','a','b'),
-        #                     function(Const,a,b,depth) NULL)
-        # m2 <- stats::nls(dens~f2(Const,a,b,depth),data=cal,
-        #                  start = list(Const=0.5,a=0.01,b=0.5))
-        # dens <- predict(m2, newdata=list(depth=x$depthcm))
-        # x$dens <- dens[1:length(dens)]
-        ### fit neg exp model manually (Smith et al. 2015)
+
+        # fit neg exp model manually (Smith et al. 2015)
         m    <- 0.0205
         a    <- 0.0512
         b    <- (-0.3448)
