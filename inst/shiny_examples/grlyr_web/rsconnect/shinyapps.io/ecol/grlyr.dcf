@@ -5,8 +5,8 @@ account: ecol
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 973046
-bundleId: 2994049
+bundleId: 3172333
 url: https://ecol.shinyapps.io/grlyr/
-when: 1586469192.43967
+when: 1590011228.68597
 asMultiple: FALSE
 asStatic: FALSE
